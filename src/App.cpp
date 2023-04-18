@@ -10,9 +10,10 @@ App::App()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     m_Window = std::make_unique<Window>(1280, 720, "ImageNoiseFiltering");
-    m_OriginalImage = std::make_unique<Texture>("./data/images/cat.jpg");
+    m_OriginalImage = std::make_unique<Texture>("./data/images/dog.jpg");
     m_NoisyImage = std::make_unique<Texture>(*m_OriginalImage.get());
     m_DenoisedImage = std::make_unique<Texture>(*m_OriginalImage.get());
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     m_ImGuiIO = &ImGui::GetIO();
@@ -32,8 +33,8 @@ App::App()
     /*
     * Transform our images here
     *
-    * m_DefaultNoiser->Transform(m_NoisyImage.get());
-    * m_DefaultDenoiser->Transform(m_DenoisedImage.get());
+    * m_DefaultNoiser->TransformFrom(m_NoisyImage.get(), m_OriginalImage.get());
+    * m_DefaultDenoiser->TransformFrom(m_DenoisedImage.get(), m_NoisyImage.get());
     *
     * m_NoisyImage->Update();
     * m_DenoisedImage->Update();
@@ -83,18 +84,18 @@ void App::DoFrame(float dt)
     */
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-    ImGui::Begin("Window with cat", (bool*)0, ImGuiWindowFlags_NoDecoration);
+    ImGui::Begin("Window with dog", (bool*)0, ImGuiWindowFlags_NoDecoration ^ ImGuiWindowFlags_NoScrollbar);
     ImGui::Text("Original image");
-    ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), ImVec2(640, 480));
+    ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), ImVec2(480, 480));
     ImGui::Text("Noisy image");
-    ImGui::Image((void*)(intptr_t)m_NoisyImage->GetID(), ImVec2(640, 480));
+    ImGui::Image((void*)(intptr_t)m_NoisyImage->GetID(), ImVec2(480, 480));
     ImGui::Text("Denoised image");
-    ImGui::Image((void*)(intptr_t)m_DenoisedImage->GetID(), ImVec2(640, 480));
+    ImGui::Image((void*)(intptr_t)m_DenoisedImage->GetID(), ImVec2(480, 480));
     ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
+     
     m_FrameCounter++;
 }
 

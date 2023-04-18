@@ -8,4 +8,5 @@ public:
 	virtual ~Filter() = default;
 
 	virtual void Transform(Texture* image) = 0;
+	virtual void TransformFrom(Texture* resultImage, Texture* sourceImage) = 0;
 };
