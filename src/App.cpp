@@ -10,7 +10,7 @@ App::App()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     m_Window = std::make_unique<Window>(1280, 720, "ImageNoiseFiltering");
-
+    m_OriginalImage = std::make_unique<Texture>("./data/images/cat.jpg");
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     m_ImGuiIO = &ImGui::GetIO();
@@ -50,7 +50,7 @@ void App::DoFrame(float dt)
     m_Window->Clear(0.3f, 0.5f, 0.9f);
 
     /*
-    * draw OpenGL stuff here
+    * Draw OpenGL stuff here
     */
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -58,8 +58,11 @@ void App::DoFrame(float dt)
     ImGui::NewFrame();
 
     /*
-    * draw ImGui stuff here
+    * Draw ImGui stuff here
     */
+    ImGui::Begin("Window with cat");
+    ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), ImVec2(300, 240));
+    ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -69,7 +72,7 @@ void App::DoFrame(float dt)
 
 void App::ProcessEvents(float dt)
 {
-    // ignore input when it's captured by ImGui
+    // Ignore input when it's captured by ImGui
     if (m_ImGuiIO->WantCaptureMouse)
         return;
 

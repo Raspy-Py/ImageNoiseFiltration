@@ -34,7 +34,6 @@ Texture::Texture(int w, int h, glm::vec4* data)
 
 Texture::Texture(const char* filepath) 
 {
-    stbi_set_flip_vertically_on_load(true);
     glGenTextures(1, &m_TextureID);
     glBindTexture(GL_TEXTURE_2D, m_TextureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

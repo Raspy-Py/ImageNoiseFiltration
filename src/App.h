@@ -26,12 +26,12 @@ private:
 	void DoFrame(float dt);
 	void ProcessEvents(float dt);
 	void PollEvents(float dt);
-
-private:
 	Clock m_Clock;
 	size_t m_FrameCounter;
 	std::unique_ptr<Window> m_Window;
-	std::unique_ptr<Texture> m_Texture;
+	std::unique_ptr<Texture> m_OriginalImage;
+	std::unique_ptr<Texture> m_NoisyImage;
+	std::unique_ptr<Texture> m_DenoisedImage;
 	std::vector<std::unique_ptr<Texture>> m_PositionTextures;
 	std::vector<std::unique_ptr<Texture>> m_VelocityTextures;
 
