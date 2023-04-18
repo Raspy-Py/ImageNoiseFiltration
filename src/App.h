@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "Clock.h"
 #include "Texture.h"
+#include "Filter.h"
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -32,6 +33,8 @@ private:
 	std::unique_ptr<Texture> m_OriginalImage;
 	std::unique_ptr<Texture> m_NoisyImage;
 	std::unique_ptr<Texture> m_DenoisedImage;
+	std::unique_ptr<Filter> m_DefaulNoiser;
+	std::unique_ptr<Filter> m_DefaulDenoiser;
 	std::vector<std::unique_ptr<Texture>> m_PositionTextures;
 	std::vector<std::unique_ptr<Texture>> m_VelocityTextures;
 

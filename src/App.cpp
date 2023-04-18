@@ -5,7 +5,7 @@ App::App()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);  
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
@@ -14,9 +14,18 @@ App::App()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     m_ImGuiIO = &ImGui::GetIO();
+    m_ImGuiIO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(m_Window->Get(), true);
     ImGui_ImplOpenGL3_Init("#version 430");
+
+    /*
+    * Implement and than instantiate here image filters
+    * like this:
+    * 
+    * m_DefaultNoiser = std::make_unique<FancyNoiserName>(args...);
+    * m_DefaultDenoiser = std::make_unique<FancyDenoiserName>(args...);
+    */
 }
 
 App::~App()
@@ -75,6 +84,16 @@ void App::ProcessEvents(float dt)
     // Ignore input when it's captured by ImGui
     if (m_ImGuiIO->WantCaptureMouse)
         return;
+
+    /*
+    * Transform our images here, if needed
+    *
+    * m_DefaultNoiser->Transform(m_NoisyImage.get());
+    * m_DefaultDenoiser->Transform(m_DenoisedImage.get());
+    *
+    * m_NoisyImage->Update();
+    * m_DenoisedImage->Update();
+    */  
 
     if (glfwGetKey(m_Window->Get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
         m_Window->Close();

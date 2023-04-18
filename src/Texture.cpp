@@ -1,9 +1,11 @@
 #include "Texture.h"
+#include "Exception.h"
 #include <string>
+#include <cstring>
 
 Texture::Texture(int w, int h) 
     : 
-    m_Width(w), m_Height(h)
+    m_Width(w), m_Height(h), m_NrChannels(0), m_Data(nullptr)
 {
     glGenTextures(1, &m_TextureID);
     glBindTexture(GL_TEXTURE_2D, m_TextureID);
@@ -11,23 +13,7 @@ Texture::Texture(int w, int h)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, w, h, 0, GL_RGB32F, GL_UNSIGNED_BYTE, nullptr);
-
-    Unbind();
-}
-
-Texture::Texture(int w, int h, glm::vec4* data)
-    :
-    m_Width(w), m_Height(h)
-{
-    glGenTextures(1, &m_TextureID);
-    glBindTexture(GL_TEXTURE_2D, m_TextureID);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, data);
-
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, m_Data);
 
     Unbind();
 }
@@ -41,25 +27,66 @@ Texture::Texture(const char* filepath)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    unsigned char* data = stbi_load(filepath, &m_Width, &m_Height, &m_NrChannels, 0);
+    m_Data = stbi_load(filepath, &m_Width, &m_Height, &m_NrChannels, 0);
     std::string filepathStr(filepath);
-    bool isPng = filepathStr.substr(filepathStr.size() - 3, 3) == "png";
-    if (data) 
+    if (bool isPng = filepathStr.substr(filepathStr.size() - 3, 3) == "png")
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, (isPng ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, data);
+        throw EXCEPTION("Error: passed a PNG image: [" + std::string(filepath) + "] while it's not supported.");
+    }
+    else if (m_Data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, (isPng ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, m_Data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else 
     {
-        throw std::runtime_error("Failed to load texture: " + std::string(filepath));
-        return;
+        throw EXCEPTION("Failed to load texture: " + std::string(filepath));
     }        
-    stbi_image_free(data);
+}
+
+Texture::Texture(const Texture& other)
+    :
+    m_Width(other.m_Width), m_Height(other.m_Height), m_NrChannels(other.m_NrChannels)
+{
+    this->m_Data = new uint8_t[m_Width * m_Height * 3];
+    std::memcpy(this->m_Data, other.m_Data, m_Height * m_Width * sizeof(other.m_Data[0]) * 3);
+
+    glGenTextures(1, &m_TextureID);
+    glBindTexture(GL_TEXTURE_2D, m_TextureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_Data);
+
+    Unbind();
+}
+
+Texture& Texture::operator=(const Texture& other)
+{
+    this->m_Width       = other.m_Width;
+    this->m_Height      = other.m_Height;
+    this->m_NrChannels  = other.m_NrChannels;
+    this->m_Data        = new uint8_t[m_Width * m_Height * 3];
+    std::memcpy(this->m_Data, other.m_Data, m_Height * m_Width * sizeof(other.m_Data[0]) * 3);
+
+    glGenTextures(1, &m_TextureID);
+    glBindTexture(GL_TEXTURE_2D, m_TextureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_Data);
+
+    Unbind();
+    return *this;
 }
 
 Texture::~Texture() 
 {
     glDeleteTextures(1, &m_TextureID);
+
+    delete[] m_Data;
 }
 
 void Texture::Bind(unsigned int slot) const
@@ -75,6 +102,13 @@ void Texture::BindCompute(unsigned int slot) const
 
 void Texture::Unbind() const
 {
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::Update()
+{
+    glBindTexture(GL_TEXTURE_2D, m_TextureID);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, m_Data);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
