@@ -1,10 +1,7 @@
 #include <iostream>
-#include <glad/glad.h>
-#include <stb_image/stb_image.h>
-#include <glm/glm.hpp>
-#include "Filter.h"
-
-class Filter;
+#include "glad/glad.h"
+#include "stb_image/stb_image.h"
+#include "glm/glm.hpp"
 
 class Texture 
 {

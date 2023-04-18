@@ -72,7 +72,9 @@ void App::DoFrame(float dt)
     * Draw ImGui stuff here
     */
     ImGui::Begin("Window with cat");
-    ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), ImVec2(300, 240));
+    ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), ImVec2(640, 480));
+    ImGui::Image((void*)(intptr_t)m_NoisyImage->GetID(), ImVec2(640, 480));
+    ImGui::Image((void*)(intptr_t)m_DenoisedImage->GetID(), ImVec2(640, 480));
     ImGui::End();
 
     ImGui::Render();
@@ -83,10 +85,6 @@ void App::DoFrame(float dt)
 
 void App::ProcessEvents(float dt)
 {
-    // Ignore input when it's captured by ImGui
-    if (m_ImGuiIO->WantCaptureMouse)
-        return;
-
     /*
     * Transform our images here, if needed
     *
@@ -96,9 +94,16 @@ void App::ProcessEvents(float dt)
     * m_NoisyImage->Update();
     * m_DenoisedImage->Update();
     */  
-
+    
+    // Keyboard input
     if (glfwGetKey(m_Window->Get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
         m_Window->Close();
+
+    // Ignore mouse input when it's captured by ImGui
+    if (m_ImGuiIO->WantCaptureMouse)
+        return;
+
+    // Mouse input
 }
 
 void App::PollEvents(float dt)
