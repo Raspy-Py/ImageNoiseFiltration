@@ -984,6 +984,9 @@
     <ClInclude Include="src\SafeWindows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\include\glad\glad.c">

@@ -11,6 +11,8 @@ App::App()
 
     m_Window = std::make_unique<Window>(1280, 720, "ImageNoiseFiltering");
     m_OriginalImage = std::make_unique<Texture>("./data/images/cat.jpg");
+    m_NoisyImage = std::make_unique<Texture>(*m_OriginalImage.get());
+    m_DenoisedImage = std::make_unique<Texture>(*m_OriginalImage.get());
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     m_ImGuiIO = &ImGui::GetIO();

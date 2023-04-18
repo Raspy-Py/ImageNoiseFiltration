@@ -464,6 +464,7 @@
     <ClInclude Include="external\include\SOIL2\stb_image_write.h" />
     <ClInclude Include="external\include\SOIL2\wfETC.h" />
     <ClInclude Include="external\include\stb_image\stb_image.h" />
+    <ClInclude Include="src\Filter.h" />
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Clock.h" />
     <ClInclude Include="src\Exception.h" />
