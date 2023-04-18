@@ -464,6 +464,12 @@
     <ClInclude Include="external\include\SOIL2\stb_image_write.h" />
     <ClInclude Include="external\include\SOIL2\wfETC.h" />
     <ClInclude Include="external\include\stb_image\stb_image.h" />
+    <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\Clock.h" />
+    <ClInclude Include="src\Exception.h" />
+    <ClInclude Include="src\SafeWindows.h" />
+    <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\include\glad\glad.c" />
@@ -479,7 +485,12 @@
     <ClCompile Include="external\include\SOIL2\image_helper.c" />
     <ClCompile Include="external\include\SOIL2\SOIL2.c" />
     <ClCompile Include="external\include\SOIL2\wfETC.c" />
+    <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\Clock.cpp" />
+    <ClCompile Include="src\Exception.cpp" />
     <ClCompile Include="src\ImageNoiseFiltering.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
