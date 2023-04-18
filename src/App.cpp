@@ -28,6 +28,16 @@ App::App()
     * m_DefaultNoiser = std::make_unique<FancyNoiserName>(args...);
     * m_DefaultDenoiser = std::make_unique<FancyDenoiserName>(args...);
     */
+
+    /*
+    * Transform our images here
+    *
+    * m_DefaultNoiser->Transform(m_NoisyImage.get());
+    * m_DefaultDenoiser->Transform(m_DenoisedImage.get());
+    *
+    * m_NoisyImage->Update();
+    * m_DenoisedImage->Update();
+    */
 }
 
 App::~App()
@@ -71,9 +81,14 @@ void App::DoFrame(float dt)
     /*
     * Draw ImGui stuff here
     */
-    ImGui::Begin("Window with cat");
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+    ImGui::Begin("Window with cat", (bool*)0, ImGuiWindowFlags_NoDecoration);
+    ImGui::Text("Original image");
     ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), ImVec2(640, 480));
+    ImGui::Text("Noisy image");
     ImGui::Image((void*)(intptr_t)m_NoisyImage->GetID(), ImVec2(640, 480));
+    ImGui::Text("Denoised image");
     ImGui::Image((void*)(intptr_t)m_DenoisedImage->GetID(), ImVec2(640, 480));
     ImGui::End();
 
@@ -84,17 +99,7 @@ void App::DoFrame(float dt)
 }
 
 void App::ProcessEvents(float dt)
-{
-    /*
-    * Transform our images here, if needed
-    *
-    * m_DefaultNoiser->Transform(m_NoisyImage.get());
-    * m_DefaultDenoiser->Transform(m_DenoisedImage.get());
-    *
-    * m_NoisyImage->Update();
-    * m_DenoisedImage->Update();
-    */  
-    
+{   
     // Keyboard input
     if (glfwGetKey(m_Window->Get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
         m_Window->Close();
