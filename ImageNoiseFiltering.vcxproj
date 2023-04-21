@@ -464,6 +464,7 @@
     <ClInclude Include="external\include\SOIL2\stb_image_write.h" />
     <ClInclude Include="external\include\SOIL2\wfETC.h" />
     <ClInclude Include="external\include\stb_image\stb_image.h" />
+    <ClInclude Include="src\GaussianNoiser.h" />
     <ClInclude Include="src\Filter.h" />
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Clock.h" />
@@ -486,6 +487,7 @@
     <ClCompile Include="external\include\SOIL2\image_helper.c" />
     <ClCompile Include="external\include\SOIL2\SOIL2.c" />
     <ClCompile Include="external\include\SOIL2\wfETC.c" />
+    <ClCompile Include="src\GaussianNoiser.cpp" />
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Clock.cpp" />
     <ClCompile Include="src\Exception.cpp" />

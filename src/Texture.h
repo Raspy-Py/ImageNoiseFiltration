@@ -5,7 +5,6 @@
 
 class Texture 
 {
-    friend class Filter;
 public:
     Texture(int w, int h);
     Texture(const char* filepath);
@@ -20,10 +19,14 @@ public:
 
     GLuint GetID();
 
+
+
+public:
+    uint8_t* data;
+    int width;
+    int height;
+    int nrChannels;
+
 private:
     GLuint m_TextureID;
-    uint8_t* m_Data;
-    int m_Width;
-    int m_Height;
-    int m_NrChannels;
 };

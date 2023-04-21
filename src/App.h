@@ -27,14 +27,19 @@ private:
 	void DoFrame(float dt);
 	void ProcessEvents(float dt);
 	void PollEvents(float dt);
+
+private:
+	// Algorithm params
+	float m_Mean;
+	float m_StandartDeviation;
 	Clock m_Clock;
 	size_t m_FrameCounter;
 	std::unique_ptr<Window> m_Window;
 	std::unique_ptr<Texture> m_OriginalImage;
 	std::unique_ptr<Texture> m_NoisyImage;
 	std::unique_ptr<Texture> m_DenoisedImage;
-	std::unique_ptr<Filter> m_DefaulNoiser;
-	std::unique_ptr<Filter> m_DefaulDenoiser;
+	std::unique_ptr<Filter> m_DefaultNoiser;
+	std::unique_ptr<Filter> m_DefaultDenoiser;
 	std::vector<std::unique_ptr<Texture>> m_PositionTextures;
 	std::vector<std::unique_ptr<Texture>> m_VelocityTextures;
 

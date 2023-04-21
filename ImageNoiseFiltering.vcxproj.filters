@@ -987,6 +987,9 @@
     <ClInclude Include="src\Filter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\GaussianNoiser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\include\glad\glad.c">
@@ -1044,6 +1047,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Clock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GaussianNoiser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
