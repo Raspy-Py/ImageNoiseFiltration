@@ -92,21 +92,21 @@ void App::DoFrame(float dt)
     // Content window
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImGui::SetNextWindowSize(ImVec2(display.x * 0.7, display.y));
-    ImGui::Begin("Window with dog", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("Original image");
-    ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), imageSize);
+    ImGui::Begin("Content", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    //ImGui::Text("Original image");
+    //ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), imageSize);
     ImGui::Text("Noisy image");
     ImGui::Image((void*)(intptr_t)m_NoisyImage->GetID(), imageSize);
-    ImGui::Text("Denoised image");
-    ImGui::Image((void*)(intptr_t)m_DenoisedImage->GetID(), imageSize);
+    //ImGui::Text("Denoised image");
+    //ImGui::Image((void*)(intptr_t)m_DenoisedImage->GetID(), imageSize);
     ImGui::End();
 
     // Settings window
     ImGui::SetNextWindowPos(ImVec2(display.x * 0.7, 0.0f));
     ImGui::SetNextWindowSize(ImVec2(display.x * 0.3, display.y));
-    ImGui::Begin("Settings Window", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Settings", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
     ImGui::SliderFloat("Standart deviation", &m_StandartDeviation, 0.0f, 50.0f);
-    if (ImGui::Button("Regenarate noise"))
+    if (ImGui::Button("Regenerate noise"))
     {
         m_DefaultNoiser->SetParam("standartDeviation", m_StandartDeviation);
         m_DefaultNoiser->TransformFrom(m_NoisyImage.get(), m_OriginalImage.get());
