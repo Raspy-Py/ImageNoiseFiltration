@@ -6,43 +6,43 @@ App::App()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);  
-glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-m_Window = std::make_unique<Window>(1280, 720, "ImageNoiseFiltering");
-m_OriginalImage = std::make_unique<Texture>("./data/images/dog.jpg");
-m_NoisyImage = std::make_unique<Texture>(*m_OriginalImage.get());
-m_DenoisedImage = std::make_unique<Texture>(*m_OriginalImage.get());
+    m_Window = std::make_unique<Window>(1280, 720, "ImageNoiseFiltering");
+    m_OriginalImage = std::make_unique<Texture>("./data/images/dog.jpg");
+    m_NoisyImage = std::make_unique<Texture>(*m_OriginalImage.get());
+    m_DenoisedImage = std::make_unique<Texture>(*m_OriginalImage.get());
 
-IMGUI_CHECKVERSION();
-ImGui::CreateContext();
-m_ImGuiIO = &ImGui::GetIO();
-m_ImGuiIO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-ImGui::StyleColorsDark();
-ImGui_ImplGlfw_InitForOpenGL(m_Window->Get(), true);
-ImGui_ImplOpenGL3_Init("#version 430");
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    m_ImGuiIO = &ImGui::GetIO();
+    m_ImGuiIO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(m_Window->Get(), true);
+    ImGui_ImplOpenGL3_Init("#version 430");
 
 
-m_Mean = 0.0;
-m_StandartDeviation = 15.0;
-/*
-* Implement and than instantiate here image filters
-* like this:
-*
-* m_DefaultDenoiser = std::make_unique<FancyDenoiserName>(args...);
-*/
-m_DefaultNoiser = std::make_unique<GaussianNoiser>(m_Mean, m_StandartDeviation);
+    m_Mean = 0.0;
+    m_StandartDeviation = 15.0;
+    /*
+    * Implement and than instantiate here image filters
+    * like this:
+    *
+    * m_DefaultDenoiser = std::make_unique<FancyDenoiserName>(args...);
+    */
+    m_DefaultNoiser = std::make_unique<GaussianNoiser>(m_Mean, m_StandartDeviation);
 
-/*
-* Transform our images here
-*
-* m_DefaultDenoiser->TransformFrom(m_DenoisedImage.get(), m_NoisyImage.get());
-*
-* m_DenoisedImage->Update();
-*/
-m_DefaultNoiser->Transform(m_NoisyImage.get());
-m_NoisyImage->Update();
+    /*
+    * Transform our images here
+    *
+    * m_DefaultDenoiser->TransformFrom(m_DenoisedImage.get(), m_NoisyImage.get());
+    *
+    * m_DenoisedImage->Update();
+    */
+    m_DefaultNoiser->Transform(m_NoisyImage.get());
+    m_NoisyImage->Update();
 }
 
 App::~App()
