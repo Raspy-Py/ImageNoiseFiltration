@@ -28,5 +28,8 @@ public:
     int nrChannels;
 
 private:
+    GLint GetGLFormat();
+
+private:
     GLuint m_TextureID;
 };

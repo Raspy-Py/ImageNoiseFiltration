@@ -1,6 +1,11 @@
 #include "Window.h"
 #include "Exception.h"
 
+#include <sstream>
+#include <fstream>
+
+std::queue<std::string> Window::s_DropedFilesPaths;
+
 Window::Window(int width, int height, const char* title, bool fullscreen)
     :
     m_Title(title), m_FullScreen(fullscreen)
@@ -25,9 +30,10 @@ Window::Window(int width, int height, const char* title, bool fullscreen)
         throw EXCEPTION("Failed to create window");
         glfwTerminate();
     }
-
+    
     glfwMakeContextCurrent(m_Window);
     glfwSetFramebufferSizeCallback(m_Window, Window::FramebufferSizeCallBack);
+    glfwSetDropCallback(m_Window, Window::DropCallBack);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         throw EXCEPTION("Failed to init glad.");
@@ -104,7 +110,26 @@ void Window::SetFullScreen(bool flag)
     glViewport(0, 0, m_Width, m_Height);
 }
 
+std::optional<std::string> Window::TryPopDropedFile()
+{
+    if (s_DropedFilesPaths.empty())
+        return std::nullopt;
+
+    std::string filePath = std::move(s_DropedFilesPaths.front());
+    s_DropedFilesPaths.pop();
+
+    return std::make_optional(std::move(filePath));
+}
+
 void Window::FramebufferSizeCallBack(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void Window::DropCallBack(GLFWwindow* window, int count, const char** paths)
+{
+    for (int i = 0; i < count; i++)
+    {
+        Window::s_DropedFilesPaths.emplace(paths[i]);
+    }
 }

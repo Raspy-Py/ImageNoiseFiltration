@@ -1,6 +1,9 @@
 #include "App.h"
 #include "GaussianNoiser.h"
+#include "Utils.h"
 #include <random>
+
+#include "imgui/imgui.h"
 
 App::App()
 {
@@ -19,10 +22,11 @@ App::App()
     ImGui::CreateContext();
     m_ImGuiIO = &ImGui::GetIO();
     m_ImGuiIO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(m_Window->Get(), true);
     ImGui_ImplOpenGL3_Init("#version 430");
 
+    utils::EmbraceTheDarkness();
+    //utils::ImGuiTheme1();
 
     m_Mean = 0.0;
     m_StandartDeviation = 15.0;
@@ -73,7 +77,21 @@ void App::Run()
 
 void App::DoFrame(float dt)
 {
-    m_Window->Clear(0.3f, 0.5f, 0.9f);
+    /*
+    * Processing input
+    */
+
+    if (auto dropedFile = m_Window->TryPopDropedFile())
+    {
+        m_OriginalImage.reset(new Texture(dropedFile.value().c_str()));
+        m_NoisyImage.reset(new Texture(*m_OriginalImage.get()));
+        m_DefaultNoiser->TransformFrom(m_NoisyImage.get(), m_OriginalImage.get());
+
+        m_OriginalImage->Update();
+        m_NoisyImage->Update();
+    }
+
+    m_Window->Clear(0.1f, 0.1f, 0.1f);
 
     /*
     * Draw OpenGL stuff here
@@ -87,14 +105,17 @@ void App::DoFrame(float dt)
     * Draw ImGui stuff here
     */
     ImVec2 display = ImGui::GetIO().DisplaySize;
-    ImVec2 imageSize(display.x * 0.65, display.x * 0.65 / (float)m_OriginalImage->width * (float)m_OriginalImage->height);
+    float imageAR = (float)m_OriginalImage->width / (float)m_OriginalImage->height;
+    ImVec2 imageSize(display.x * 0.65, display.x * 0.65 / imageAR);
+
+
 
     // Content window
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImGui::SetNextWindowSize(ImVec2(display.x * 0.7, display.y));
-    ImGui::Begin("Content", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    //ImGui::Text("Original image");
-    //ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), imageSize);
+    ImGui::Begin("Content", (bool*)0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+    ImGui::Text("Original image");
+    ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), imageSize);
     ImGui::Text("Noisy image");
     ImGui::Image((void*)(intptr_t)m_NoisyImage->GetID(), imageSize);
     //ImGui::Text("Denoised image");
@@ -104,16 +125,16 @@ void App::DoFrame(float dt)
     // Settings window
     ImGui::SetNextWindowPos(ImVec2(display.x * 0.7, 0.0f));
     ImGui::SetNextWindowSize(ImVec2(display.x * 0.3, display.y));
-    ImGui::Begin("Settings", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::SliderFloat("Standart deviation", &m_StandartDeviation, 0.0f, 50.0f);
+    ImGui::Begin("Settings", (bool*)0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+    ImGui::SliderFloat(AS_PREFIX("Standart deviation"), &m_StandartDeviation, 0.0f, 30.0f);
     if (ImGui::Button("Regenerate noise"))
     {
         m_DefaultNoiser->SetParam("standartDeviation", m_StandartDeviation);
         m_DefaultNoiser->TransformFrom(m_NoisyImage.get(), m_OriginalImage.get());
         m_NoisyImage->Update();
+        m_OriginalImage->Update();
     }
     ImGui::End();
-
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -27,6 +27,23 @@ void GaussianNoiser::TransformFrom(Texture* resultImage, Texture* sourceImage)
 {
     srand(time(NULL));
     size_t nSamples = resultImage->width * resultImage->height * resultImage->nrChannels;
+
+    if (resultImage->width != sourceImage->width ||
+        resultImage->height != sourceImage->height ||
+        resultImage->nrChannels != sourceImage->nrChannels)
+    {
+        resultImage->width = sourceImage->width;
+        resultImage->height = sourceImage->height;
+        resultImage->nrChannels = sourceImage->nrChannels;
+
+        if (resultImage->data != nullptr)
+        {
+            delete[] resultImage->data;
+        }
+
+        resultImage->data = new uint8_t[sourceImage->width * sourceImage->height * sourceImage->nrChannels];
+    }
+
     for (size_t i = 0; i < nSamples; i += resultImage->nrChannels)
     {
         float noise = RandBias();
@@ -44,14 +61,18 @@ void GaussianNoiser::SetParam(const char* name, float value)
     }
 }
 
-float GaussianNoiser::RandBias() {
+float GaussianNoiser::RandBias() 
+{
     static float z0, z1;
     static bool generate;
     generate = !generate;
     if (!generate)
+    {
         return z1 * m_StandartDeviation + m_Mean;
+    }
     float u1, u2;
-    do {
+    do 
+    {
         u1 = rand() * (1.0f / RAND_MAX);
         u2 = rand() * (1.0f / RAND_MAX);
     } while (u1 <= 1e-7f);
