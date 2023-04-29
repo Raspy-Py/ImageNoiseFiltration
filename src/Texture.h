@@ -19,8 +19,6 @@ public:
 
     GLuint GetID();
 
-
-
 public:
     uint8_t* data;
     int width;

@@ -28,7 +28,7 @@ Texture::Texture(const char* filepath)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    data = stbi_load(filepath, &width, &height, &nrChannels, 0);
+    data = stbi_load(filepath, &width, &height, &nrChannels, 3);
     GLint format = GetGLFormat();
 
     if (data)
@@ -124,8 +124,8 @@ GLint Texture::GetGLFormat()
     switch (nrChannels)
     {
     case 3: format = GL_RGB; break;
-    default:
-        throw EXCEPTION("Invalid image format: " + std::to_string(nrChannels) + " number of channels is not supported.");
+    //default:
+        //throw EXCEPTION("Invalid image format: " + std::to_string(nrChannels) + " number of channels is not supported.");
     }
 
     return format;

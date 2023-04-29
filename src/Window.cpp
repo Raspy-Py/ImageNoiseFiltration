@@ -5,6 +5,8 @@
 #include <fstream>
 
 std::queue<std::string> Window::s_DropedFilesPaths;
+std::function<void(GLFWwindow*, int, int)> Window::s_FramebufferSizeCallback = [](GLFWwindow*, int, int)->void {};
+std::function<void(GLFWwindow*, int, const char**)> Window::s_DropCallBack = [](GLFWwindow*, int, const char**)->void {};
 
 Window::Window(int width, int height, const char* title, bool fullscreen)
     :
@@ -32,8 +34,8 @@ Window::Window(int width, int height, const char* title, bool fullscreen)
     }
     
     glfwMakeContextCurrent(m_Window);
-    glfwSetFramebufferSizeCallback(m_Window, Window::FramebufferSizeCallBack);
-    glfwSetDropCallback(m_Window, Window::DropCallBack);
+    glfwSetFramebufferSizeCallback(m_Window, Window::DefaultFramebufferSizeCallBack);
+    glfwSetDropCallback(m_Window, Window::DefaultDropCallBack);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         throw EXCEPTION("Failed to init glad.");
@@ -106,7 +108,8 @@ void Window::SetFullScreen(bool flag)
     }
 
     glfwMakeContextCurrent(m_Window);
-    glfwSetFramebufferSizeCallback(m_Window, Window::FramebufferSizeCallBack);
+    glfwSetFramebufferSizeCallback(m_Window, Window::DefaultFramebufferSizeCallBack);
+    glfwSetDropCallback(m_Window, Window::DefaultDropCallBack);
     glViewport(0, 0, m_Width, m_Height);
 }
 
@@ -121,15 +124,27 @@ std::optional<std::string> Window::TryPopDropedFile()
     return std::make_optional(std::move(filePath));
 }
 
-void Window::FramebufferSizeCallBack(GLFWwindow* window, int width, int height)
+void Window::SetFramebufferSizeCallBack(std::function<void(GLFWwindow*, int, int)>&& callback)
 {
-    glViewport(0, 0, width, height);
+    s_FramebufferSizeCallback = std::move(callback);
 }
 
-void Window::DropCallBack(GLFWwindow* window, int count, const char** paths)
+void Window::SetDropCallBack(std::function<void(GLFWwindow*, int, const char**)>&& callback)
+{
+    s_DropCallBack = std::move(callback);
+}
+
+void Window::DefaultFramebufferSizeCallBack(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+    s_FramebufferSizeCallback(window, width, height);
+}
+
+void Window::DefaultDropCallBack(GLFWwindow* window, int count, const char** paths)
 {
     for (int i = 0; i < count; i++)
     {
         Window::s_DropedFilesPaths.emplace(paths[i]);
     }
+    s_DropCallBack(window, count, paths);
 }

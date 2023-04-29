@@ -473,6 +473,7 @@
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Clock.h" />
     <ClInclude Include="src\Exception.h" />
+    <ClInclude Include="src\Menu.h" />
     <ClInclude Include="src\SafeWindows.h" />
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\Utils.h" />
@@ -497,6 +498,7 @@
     <ClCompile Include="src\Clock.cpp" />
     <ClCompile Include="src\Exception.cpp" />
     <ClCompile Include="src\ImageNoiseFiltering.cpp" />
+    <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>

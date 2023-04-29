@@ -13,30 +13,28 @@ App::App()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+    // Most of the magic numbers gethered here
+    m_Settings = { 
+        .noiseMean = 0.0f,
+        .noiseStadDev = 10.0f,
+        .noiseStadDevMax = 30.0f,
+        .relImageWidth = 0.675f,
+        .relContentWindowWidth = 0.7f,
+        .relSettingsWindowWidth = 0.3f,
+    };
+
     m_Window = std::make_unique<Window>(1280, 720, "ImageNoiseFiltering");
     m_OriginalImage = std::make_unique<Texture>("./data/images/dog.jpg");
     m_NoisyImage = std::make_unique<Texture>(*m_OriginalImage.get());
-    m_DenoisedImage = std::make_unique<Texture>(*m_OriginalImage.get());
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    m_ImGuiIO = &ImGui::GetIO();
-    m_ImGuiIO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    ImGui_ImplGlfw_InitForOpenGL(m_Window->Get(), true);
-    ImGui_ImplOpenGL3_Init("#version 430");
-
-    utils::EmbraceTheDarkness();
-    //utils::ImGuiTheme1();
-
-    m_Mean = 0.0;
-    m_StandartDeviation = 15.0;
     /*
     * Implement and than instantiate here image filters
     * like this:
     *
     * m_DefaultDenoiser = std::make_unique<FancyDenoiserName>(args...);
     */
-    m_DefaultNoiser = std::make_unique<GaussianNoiser>(m_Mean, m_StandartDeviation);
+    m_DefaultNoiser = std::make_unique<GaussianNoiser>(m_Settings.noiseMean, m_Settings.noiseStadDev);
+
 
     /*
     * Transform our images here
@@ -47,13 +45,86 @@ App::App()
     */
     m_DefaultNoiser->Transform(m_NoisyImage.get());
     m_NoisyImage->Update();
+
+    m_DenoisedImage = std::make_unique<Texture>(*m_NoisyImage.get());
+
+    m_Menu = std::make_unique<Menu>(m_Window->Get());
+    // Some hacky-packy
+    m_Menu->Render();
+    m_ImGuiIO = &ImGui::GetIO();
+    ImVec2 display = m_ImGuiIO->DisplaySize;
+    float imageAR = (float)m_OriginalImage->width / (float)m_OriginalImage->height;
+    ImVec2 imageSize(display.x * m_Settings.relImageWidth, 
+                     display.x * m_Settings.relImageWidth / imageAR);
+
+    m_Menu->AddWindow("Content", ImVec2(0, 0), ImVec2(display.x * m_Settings.relContentWindowWidth, display.y))
+        .AddText("Original image")
+        .AddImage("original_image", m_OriginalImage->GetID(), imageSize)
+        .AddText("Noisy image")
+        .AddImage("noisy_image", m_NoisyImage->GetID(), imageSize)
+        .AddText("Denoised image")
+        .AddImage("denoised_image", m_DenoisedImage->GetID(), imageSize);
+
+    m_Menu->AddWindow("Settings", 
+            ImVec2(display.x * m_Settings.relContentWindowWidth, 0), 
+            ImVec2(display.x * m_Settings.relSettingsWindowWidth, display.y))
+        .AddSliderFloat("Noise level", &m_Settings.noiseStadDev, 0.0f, m_Settings.noiseStadDevMax)
+        .AddButton("Regenerate noise", [this] {
+            m_DefaultNoiser->SetParam("standartDeviation", m_Settings.noiseStadDev);
+            m_DefaultNoiser->TransformFrom(m_NoisyImage.get(), m_OriginalImage.get());
+            m_NoisyImage->Update();
+            m_OriginalImage->Update();
+        });
+
+    Window::SetDropCallBack([this](GLFWwindow* window, int count, const char** paths) {
+        if (auto dropedFile = m_Window->TryPopDropedFile())
+        {
+            m_OriginalImage.reset(new Texture(dropedFile.value().c_str()));
+
+            m_NoisyImage.reset(new Texture(*m_OriginalImage.get()));
+            m_DefaultNoiser->TransformFrom(m_NoisyImage.get(), m_OriginalImage.get());
+
+            m_DenoisedImage.reset(new Texture(*m_NoisyImage.get()));
+            // TODO: apply filtering to m_DenoisedImage
+
+            ImVec2 display = m_ImGuiIO->DisplaySize;
+            float imageAR = (float)m_OriginalImage->width / (float)m_OriginalImage->height;
+            ImVec2 imageSize(display.x * m_Settings.relImageWidth, display.x * m_Settings.relImageWidth / imageAR);
+
+            m_Menu->AlterWindow("Content")
+                .AddImage("original_image", m_OriginalImage->GetID(), imageSize)
+                .AddImage("noisy_image",    m_NoisyImage->GetID(),    imageSize)
+                .AddImage("denoised_image", m_DenoisedImage->GetID(), imageSize);
+
+            m_OriginalImage->Update();
+            m_NoisyImage->Update();
+            m_DenoisedImage->Update();
+        }});
+    Window::SetFramebufferSizeCallBack([this](GLFWwindow* window, int width, int height) {
+        float imageAR = (float)m_OriginalImage->width / (float)m_OriginalImage->height;
+        ImVec2 imageSize(width * m_Settings.relImageWidth, width * m_Settings.relImageWidth / imageAR);
+
+        m_Menu->AlterWindow("Content")
+            .SetSize(ImVec2(width * m_Settings.relContentWindowWidth, height));
+        m_Menu->AlterWindow("Content")
+            .SetPosition(ImVec2(0, 0));
+        m_Menu->AlterWindow("Content")
+            .AddImage("original_image", m_OriginalImage->GetID(), imageSize)
+            .AddImage("noisy_image",    m_NoisyImage->GetID(),    imageSize)
+            .AddImage("denoised_image", m_DenoisedImage->GetID(), imageSize);
+
+        m_Menu->AlterWindow("Settings")
+            .SetSize(ImVec2(width * m_Settings.relSettingsWindowWidth, height));
+        m_Menu->AlterWindow("Settings")
+            .SetPosition(ImVec2(width * m_Settings.relContentWindowWidth, 0));
+        });
+
+    // ImGui style
+    Menu::EmbraceTheDarkness();
 }
 
 App::~App()
 {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
     glfwTerminate();
 }
 
@@ -77,68 +148,14 @@ void App::Run()
 
 void App::DoFrame(float dt)
 {
-    /*
-    * Processing input
-    */
+    m_Window->Clear(0.105f, 0.105f, 0.105f);
 
-    if (auto dropedFile = m_Window->TryPopDropedFile())
-    {
-        m_OriginalImage.reset(new Texture(dropedFile.value().c_str()));
-        m_NoisyImage.reset(new Texture(*m_OriginalImage.get()));
-        m_DefaultNoiser->TransformFrom(m_NoisyImage.get(), m_OriginalImage.get());
+    // Draw OpenGL stuff here
+    
 
-        m_OriginalImage->Update();
-        m_NoisyImage->Update();
-    }
+    // Draw ImGui stuff here
+    m_Menu->Render();
 
-    m_Window->Clear(0.1f, 0.1f, 0.1f);
-
-    /*
-    * Draw OpenGL stuff here
-    */
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    /*
-    * Draw ImGui stuff here
-    */
-    ImVec2 display = ImGui::GetIO().DisplaySize;
-    float imageAR = (float)m_OriginalImage->width / (float)m_OriginalImage->height;
-    ImVec2 imageSize(display.x * 0.65, display.x * 0.65 / imageAR);
-
-
-
-    // Content window
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-    ImGui::SetNextWindowSize(ImVec2(display.x * 0.7, display.y));
-    ImGui::Begin("Content", (bool*)0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-    ImGui::Text("Original image");
-    ImGui::Image((void*)(intptr_t)m_OriginalImage->GetID(), imageSize);
-    ImGui::Text("Noisy image");
-    ImGui::Image((void*)(intptr_t)m_NoisyImage->GetID(), imageSize);
-    //ImGui::Text("Denoised image");
-    //ImGui::Image((void*)(intptr_t)m_DenoisedImage->GetID(), imageSize);
-    ImGui::End();
-
-    // Settings window
-    ImGui::SetNextWindowPos(ImVec2(display.x * 0.7, 0.0f));
-    ImGui::SetNextWindowSize(ImVec2(display.x * 0.3, display.y));
-    ImGui::Begin("Settings", (bool*)0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-    ImGui::SliderFloat(AS_PREFIX("Standart deviation"), &m_StandartDeviation, 0.0f, 30.0f);
-    if (ImGui::Button("Regenerate noise"))
-    {
-        m_DefaultNoiser->SetParam("standartDeviation", m_StandartDeviation);
-        m_DefaultNoiser->TransformFrom(m_NoisyImage.get(), m_OriginalImage.get());
-        m_NoisyImage->Update();
-        m_OriginalImage->Update();
-    }
-    ImGui::End();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-     
     m_FrameCounter++;
 }
 
